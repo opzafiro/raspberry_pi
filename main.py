@@ -16,7 +16,7 @@ proceso_camara = Popen(['rpicam-still',
                                 '-n',
                                 '-s',
                                 '-v', '1',
-                                '-t', '0',
+                                '-t', '11000000',
                                 '--rotation','180',
                                 '--autofocus-mode', 'continuous',
                                 '-o', path_imagen])
