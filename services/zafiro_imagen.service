@@ -1,0 +1,19 @@
+[Unit]
+Description=Envia imagen detectada al servidor
+After=network.target
+
+[Service]
+# Ruta del usuario y entorno
+User=zafiro
+WorkingDirectory=/home/zafiro/raspberry_pi
+
+# Ejecuta el script usando el python del entorno virtual
+ExecStart=/home/zafiro/raspberry_pi/entorno_virtual/bin/python clientes/cliente_imagen.py
+
+# Reiniciar automáticamente si se cae
+Restart=always
+RestartSec=5
+
+
+[Install]
+WantedBy=multi-user.target
