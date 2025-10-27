@@ -1,5 +1,6 @@
 #!/bin/bash
 mkdir -p imagenes/miniatura imagenes/originales imagenes/recortadas imagenes/originales_copy
+mkdir -p audios/enviar audios/recibidos
 sudo apt update
 sudo apt install libvips-tools #sistema de procesamiento de imágenes
 
