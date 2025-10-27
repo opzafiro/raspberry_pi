@@ -3,7 +3,8 @@ mkdir -p imagenes/miniatura imagenes/originales imagenes/recortadas imagenes/ori
 mkdir -p audios/enviar audios/recibidos
 sudo apt update
 sudo apt install libvips-tools #sistema de procesamiento de imágenes
-
+sudo apt-get install mpg123 #reproductor mp3
+sudo loginctl enable-linger zafiro # mantener el usuario activo sin ingreasa al usuario
 #audio
 sudo apt install pulseaudio pulseaudio-module-bluetooth bluez-tools
 pulseaudio -k

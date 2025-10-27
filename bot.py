@@ -4,15 +4,20 @@ from datetime import datetime
 from gpiozero import Button
 from queue import Queue
 from subprocess import Popen
+import json
 
-token= '7392248545:AAGcbygZXKnSyjT_ySgbmbcLppCC-uQGvjk'
+with open("config.json", "r", encoding="utf-8") as f:
+        config = json.load(f)
+
+token= config['bot_token']
 
 audios = []
 len_audios = 0
 index = -1
 reproduciendo= None
 
-pin_reproduce_audio = 20
+
+pin_reproduce_audio = config['pin_respuesta']
 button_reproduce_audio = Button(pin= pin_reproduce_audio, bounce_time=0.1, hold_time=1)
 
 def reproducir_audio_siguiente():
@@ -24,7 +29,8 @@ def reproducir_audio_siguiente():
 
     if len_audios > 0:
         index = (index+1)% len_audios
-        reproduciendo = Popen(['vlc', '-I', 'dummy', '--play-and-exit', audios[index]])
+        #reproduciendo = Popen(['cvlc', '-I', 'dummy', '--play-and-exit', audios[index]])
+        reproduciendo = Popen(['mpg123', audios[index]])
         
 
 def reproducir_audio_anterior():
@@ -37,11 +43,9 @@ def reproducir_audio_anterior():
     
     if len_audios > 0:
         index = (index-2)% len_audios
-        reproduciendo = Popen(['vlc', '-I', 'dummy', '--play-and-exit', audios[index]])
-
-
-
-
+        #reproduciendo = Popen(['cvlc', '-I', 'dummy', '--play-and-exit', audios[index]])
+        reproduciendo = Popen(['mpg123', audios[index]])
+        
 
 
 
@@ -61,10 +65,14 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)-> Non
     # Descargar el archivo
     await voice_file.download_to_drive(file_path)
 
+    Popen(['ffmpeg', '-i', file_path, file_path.replace('.ogg', '.mp3')])
+    file_path = file_path.replace('.ogg', '.mp3')
+
+
     audios.append(file_path)
     len_audios +=1
     
-    Popen(['vlc', '-I', 'dummy', '--play-and-exit', 'audios/nortificacion/011-c6-98517.mp3'])
+    #Popen(['cvlc', '-I', 'dummy', '--play-and-exit', 'audios/nortificacion/011-c6-98517.mp3'])
 
     # Responder al usuario
     #await update.message.reply_text("Recibido")
@@ -82,10 +90,38 @@ async def limpiar(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Lista de audios limpiada ✅")
 
+async def set_ip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global config
+
+    if not context.args:
+        await update.message.reply_text("Uso: /ip <dirección_ip>")
+        return
+    ip = context.args[0]
+    ip = ip.replace(' ', '') 
+
+    config['ip_servidor']=ip
+
+    with open("config.json", "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4, ensure_ascii=False)
+    '''
+    try:
+        Popen(['sudo', 'systemctl', 'restart', 'audio_zafiro.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'imagen_zafiro.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'bot_zafiro.service'])
+    except Exception as ex:
+        print('error al reiniciar demonios:', ex)
+        await update.message.reply_text('error al reiniciar los demonios')
+        return
+    '''
+
+
+    await update.message.reply_text(f'ip cambiada con exito:\n{ip}')
 
 
 application = ApplicationBuilder().token(token).build()
 application.add_handler(MessageHandler(filters.VOICE, handle_voice))
 application.add_handler(CommandHandler('l', limpiar))
+application.add_handler(CommandHandler('ip', set_ip))
+
 
 application.run_polling()

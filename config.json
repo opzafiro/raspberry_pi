@@ -1,6 +1,10 @@
 {
-  "ip_servidor": "34.133.95.82",
-  "port_aplicacion": 2121,
-  "port_imagen": 3030,
-  "port_audio": 5050
+    "ip_servidor": "192.163.0",
+    "port_aplicacion": 2121,
+    "port_imagen": 3030,
+    "port_audio": 5050,
+    "pin_imagen": 16,
+    "pin_respuesta": 20,
+    "pin_audio": 21,
+    "bot_token": "7392248545:AAGcbygZXKnSyjT_ySgbmbcLppCC-uQGvjk"
 }
