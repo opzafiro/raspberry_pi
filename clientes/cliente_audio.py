@@ -74,7 +74,7 @@ def grabar_y_enviar(audio_name):
 def iniciar_grabacion():
     global grabacion, grabando, notificacion_grabacion
     grabando = True
-    notificacion_grabacion = Popen(['vlc', '-I', 'dummy', '--loop', 'audios/nortificacion/soft-piano-72454.mp3'])
+    #notificacion_grabacion = Popen(['vlc', '-I', 'dummy', '--loop', 'audios/nortificacion/soft-piano-72454.mp3'])
 
     ahora = datetime.now()
     timestamp = ahora.strftime("%Y%m%d%H%M%S%f")
@@ -95,7 +95,7 @@ def terminar_grabacion():
     global grabacion, grabando, notificacion_grabacion
     grabando = False
     grabacion.send_signal(2)
-    notificacion_grabacion.kill()
+    #notificacion_grabacion.kill()
     print('fin grabacion')
     
 boton.when_pressed = iniciar_grabacion

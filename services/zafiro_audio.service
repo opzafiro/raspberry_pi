@@ -1,0 +1,30 @@
+[Unit]
+Description=Envia audio detectado al servidor
+After=multi-user.target
+After=network.target
+
+[Service]
+# Ruta del usuario y entorno
+User=zafiro
+WorkingDirectory=/home/zafiro/raspberry_pi
+
+# Variables de entorno necesarias
+Environment="MPG123_OUTPUT=alsa"
+Environment="MPG123_DEV=plughw:3,0"
+Environment="HOME=/home/zafiro"
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+
+# Ejecuta el script usando el python del entorno virtual
+ExecStart=/home/zafiro/raspberry_pi/entorno_virtual/bin/python clientes/cliente_audio.py
+
+# Reiniciar automáticamente si se cae
+Restart=always
+RestartSec=5
+
+# (Opcional) Redirigir salida a un log
+StandardOutput=append:/var/log/miapp.log
+StandardError=append:/var/log/miapp.err
+
+[Install]
+WantedBy=multi-user.target
