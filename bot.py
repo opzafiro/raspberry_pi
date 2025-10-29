@@ -5,6 +5,7 @@ from gpiozero import Button
 from queue import Queue
 from subprocess import Popen
 import json
+import asyncio
 
 with open("config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
@@ -72,7 +73,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)-> Non
     audios.append(file_path)
     len_audios +=1
     
-    #Popen(['cvlc', '-I', 'dummy', '--play-and-exit', 'audios/nortificacion/011-c6-98517.mp3'])
+    Popen(['mpg123', 'audios/nortificacion/011-c6-98517.mp3'])
 
     # Responder al usuario
     #await update.message.reply_text("Recibido")
@@ -103,25 +104,44 @@ async def set_ip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     with open("config.json", "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
-    '''
+    
     try:
-        Popen(['sudo', 'systemctl', 'restart', 'audio_zafiro.service'])
-        Popen(['sudo', 'systemctl', 'restart', 'imagen_zafiro.service'])
-        Popen(['sudo', 'systemctl', 'restart', 'bot_zafiro.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'zafiro_audio.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'zafiro_imagen.service'])
     except Exception as ex:
         print('error al reiniciar demonios:', ex)
         await update.message.reply_text('error al reiniciar los demonios')
         return
-    '''
-
-
+    
     await update.message.reply_text(f'ip cambiada con exito:\n{ip}')
 
+async def reinicio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
 
-application = ApplicationBuilder().token(token).build()
+        Popen(['sudo', 'systemctl', 'restart', 'zafiro_audio.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'zafiro_imagen.service'])
+        Popen(['sudo', 'systemctl', 'restart', 'zafiro_proceso_camara.service'])
+        await update.message.reply_text('reinicio exitoso')
+
+    except Exception as ex:
+        print('error al reiniciar demonios:', ex)
+        await update.message.reply_text('error al reiniciar los demonios')
+        return
+
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text('/l limpiar audios\n/ip cambiar ip server\n/r reiniciar demonios')
+
+async def on_startup(application):
+    await application.bot.send_message(chat_id='-1002148727613', text='Hola ya vamos a comenzar 😊')
+
+
+
+application = ApplicationBuilder().token(token).post_init(on_startup).build()
 application.add_handler(MessageHandler(filters.VOICE, handle_voice))
 application.add_handler(CommandHandler('l', limpiar))
 application.add_handler(CommandHandler('ip', set_ip))
-
+application.add_handler(CommandHandler('r', reinicio))
+application.add_handler(CommandHandler('help', help))
 
 application.run_polling()
+

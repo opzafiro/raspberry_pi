@@ -2,7 +2,7 @@ from socket import socket
 from time import sleep
 from os.path import basename,join ,getsize
 from gpiozero import Button
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, run
 from datetime import datetime
 from threading import Thread
 import json
@@ -21,7 +21,8 @@ boton = Button(pin_audio, bounce_time=0.1)
 grabacion= None # objeto del proceso que va a grabar
 client_socket= None 
 creando_socket = False # bandera para identificar cuando se esta creando un nuevo socket
-notificacion_grabacion = None # proceso para saber el momento en que se graba
+
+
 
 def crea_socket(audio_name:str):
     global client_socket, creando_socket
@@ -42,6 +43,24 @@ def crea_socket(audio_name:str):
 
     except Exception as ex:
         print('error en la conexion:\n',ex)
+
+
+musica = None
+def detener_musica():
+    global grabando, musica
+
+    while True:
+        if (not grabando) and musica != None:
+            if musica.poll()==None:
+                musica.kill()
+
+
+def reproducir_musica():
+    global grabando, musica
+    while grabando:
+        musica = Popen(['mpg123', 'audios/nortificacion/soft-piano-72454.mp3'])
+        musica.wait()
+
 
 
 def grabar_y_enviar(audio_name):
@@ -72,9 +91,11 @@ def grabar_y_enviar(audio_name):
             
             
 def iniciar_grabacion():
-    global grabacion, grabando, notificacion_grabacion
+    global grabacion, grabando
     grabando = True
-    #notificacion_grabacion = Popen(['vlc', '-I', 'dummy', '--loop', 'audios/nortificacion/soft-piano-72454.mp3'])
+
+    hilo_musica = Thread(target=reproducir_musica, daemon=True)
+    hilo_musica.start()
 
     ahora = datetime.now()
     timestamp = ahora.strftime("%Y%m%d%H%M%S%f")
@@ -92,10 +113,12 @@ def iniciar_grabacion():
     
 
 def terminar_grabacion():
-    global grabacion, grabando, notificacion_grabacion
+    global grabacion, grabando, musica
     grabando = False
-    grabacion.send_signal(2)
-    #notificacion_grabacion.kill()
+    if grabacion != None:
+        grabacion.send_signal(2)
+    if musica != None:
+        musica.kill()
     print('fin grabacion')
     
 boton.when_pressed = iniciar_grabacion

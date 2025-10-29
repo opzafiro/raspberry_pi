@@ -1,12 +1,12 @@
 [Unit]
-Description=Envia imagen detectada al servidor
-After=network.target
+Description=Reproduce audio con mpg123 por ALSA
+After=sound.target network.target
 
 [Service]
 Type=simple
-# Ruta del usuario y entorno
 User=zafiro
 WorkingDirectory=/home/zafiro/raspberry_pi
+
 # Variables de entorno necesarias
 Environment="MPG123_OUTPUT=alsa"
 Environment="MPG123_DEV=plughw:3,0"
@@ -14,13 +14,16 @@ Environment="HOME=/home/zafiro"
 Environment="PATH=/usr/local/bin:/usr/bin:/bin"
 Environment="XDG_RUNTIME_DIR=/run/user/1000"
 
-# Ejecuta el script usando el python del entorno virtual
-ExecStart=/home/zafiro/raspberry_pi/entorno_virtual/bin/python clientes/cliente_imagen.py
+# Comando de reproducción
+ExecStart=/usr/bin/mpg123 -v audios/prueba/Letting-Go.mp3
 
-# Reiniciar automáticamente si se cae
+# Permite acceso a la tarjeta de sonido
+DeviceAllow=char-major-116
+DeviceAllow=/dev/snd/* rw
+
+# Reinicio automático
 Restart=always
 RestartSec=5
-
 
 [Install]
 WantedBy=multi-user.target

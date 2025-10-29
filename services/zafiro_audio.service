@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 # Ruta del usuario y entorno
+Type=simple
 User=zafiro
 WorkingDirectory=/home/zafiro/raspberry_pi
 

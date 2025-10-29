@@ -1,5 +1,5 @@
 from socket import socket
-from os.path import getsize, basename, join
+from os.path import getsize, basename, join, exists
 import json
 from queue import Queue
 from threading import Thread
@@ -41,7 +41,8 @@ def hilo_enviar():
                         sock.sendfile(file)
                         print('archivo enviado\n')
         except Exception as ex:
-            imagenes.put(path_imagen)
+            if exists(path=path_imagen):
+                imagenes.put(path_imagen)
             print("Error en conexión: \n", ex)
             sleep(3)
 
@@ -55,7 +56,7 @@ class Handler(FileSystemEventHandler):
         mv = Popen(f"cp {event.src_path} {path_destino}", shell=True)
         mv.wait()
         imagenes.put(path_destino)
-        Popen(['vlc', '-I', 'dummy', '--play-and-exit', 'audios/nortificacion/canon.mp3'])
+        Popen(['mpg123','audios/nortificacion/canon.mp3'])
 
 
 
